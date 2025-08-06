@@ -1,106 +1,137 @@
 import streamlit as st
 import joblib
-import os
 import pandas as pd
 
-# 1. Load semua model (dengan cache biar efisien)
-@st.cache_resource
-def load_models():
-    models = {}
-    for i in range(1, 6):
-        path = f"model/model_pertanyaan_{i}.pkl"
-        if os.path.exists(path):
-            models[i] = joblib.load(path)
-    return models
+# Load model
+model_status = joblib.load('model/model_status.pkl')
+model_promo = joblib.load('model/model_promo.pkl')
 
-models = load_models()
+# Load dataset
+df = pd.read_excel("dataset/dataset_gabungan_600_baris.xlsx")
 
-# 2. Konfigurasi UI
-st.set_page_config(page_title="Chat Prediksi Pertanyaan CS", layout="centered")
-st.title("💬 Prediksi Bertahap Pertanyaan CS")
+# Ambil kolom pertanyaan dan jawaban
+pertanyaan_cols = [col for col in df.columns if col.startswith("Pertanyaan_CS")]
+jawaban_cols = [col for col in df.columns if col.startswith("Jawaban_Pelanggan")]
 
+# Kata kunci yang menghentikan simulasi
+STOP_KEYWORDS = ["rejected", "nomor tidak aktif", "nomor salah", "tidak bisa dihubungi"]
 
-# 3. Inisialisasi sesi
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-if "step" not in st.session_state:
-    st.session_state.step = 1
+# Konfigurasi tampilan
+st.set_page_config(page_title="Simulasi CS ICONNET", page_icon="🤖")
+st.title("🤖 Simulasi Dinamis ICONNET")
 
-# 4. Fungsi prediksi berdasarkan step
-def generate_pertanyaan(chat_history, jawaban_baru, step):
-    # Gabungkan semua history menjadi 1 input konteks
-    all_input = " ".join([item["text"] for item in chat_history if item["role"] == "pelanggan"])
-    context = f"bisa dihubungi {all_input} {jawaban_baru} bersedia bayar"
-    
-    model = models.get(step)
-    if model:
-        pred = model.predict([context])[0]
-        return pred
-    else:
-        return "Terima kasih atas jawabannya."
+# Inisialisasi session state
+if "jawaban_user" not in st.session_state:
+    st.session_state.jawaban_user = []
+if "current_level" not in st.session_state:
+    st.session_state.current_level = 0
+if "trigger_next" not in st.session_state:
+    st.session_state.trigger_next = False
+if "status_stopped" not in st.session_state:
+    st.session_state.status_stopped = False
+if "selected_pertanyaan" not in st.session_state:
+    st.session_state.selected_pertanyaan = []
 
-# 5. Tampilkan riwayat percakapan
-for chat in st.session_state.chat_history:
-    if chat["role"] == "cs":
-        st.markdown(f"**👩‍💼 CS:** {chat['text']}")
-    else:
-        st.markdown(f"**🧑 Pelanggan:** {chat['text']}")
+# Menentukan 4 pertanyaan teratas berdasarkan kemunculan
+all_pertanyaan = pd.concat([df[col].dropna() for col in pertanyaan_cols], ignore_index=True)
+most_common_questions = all_pertanyaan.value_counts().nlargest(4).index.tolist()
 
-# 6. Input user
-jawaban = st.text_input("✍️ Masukkan jawaban pelanggan")
+# Pilih 1 dari 4 pertanyaan untuk memulai simulasi
+if not st.session_state.selected_pertanyaan:
+    st.markdown("### Pilih Pertanyaan Awal")
+    for i, q in enumerate(most_common_questions):
+        if st.button(q, key=f"start_{i}"):
+            st.session_state.selected_pertanyaan = [q]
+            st.session_state.jawaban_user = []
+            st.session_state.current_level = 0
+            st.session_state.trigger_next = False
+            st.session_state.status_stopped = False
+            st.rerun()
+else:
+    # Filter baris berdasarkan pertanyaan yang dipilih
+    filtered_df = df.copy()
+    filtered_df = filtered_df[
+        filtered_df[pertanyaan_cols[0]] == st.session_state.selected_pertanyaan[0]
+    ]
 
-# 7. Tombol kirim
-if st.button("Kirim Jawaban"):
-    if jawaban.strip() == "":
-        st.warning("Jawaban tidak boleh kosong.")
-    else:
-        st.session_state.chat_history.append({"role": "pelanggan", "text": jawaban})
+    # Tambahkan filter berdasarkan jawaban sebelumnya
+    for i, jawaban in enumerate(st.session_state.jawaban_user):
+        if i < len(jawaban_cols):
+            filtered_df = filtered_df[filtered_df[jawaban_cols[i]] == jawaban]
 
-        if st.session_state.step <= 5:
-            next_pertanyaan = generate_pertanyaan(st.session_state.chat_history, jawaban, st.session_state.step)
-            st.session_state.chat_history.append({"role": "cs", "text": next_pertanyaan})
-            st.session_state.step += 1
+    # Jalankan pertanyaan berikutnya
+    level = st.session_state.current_level
+    if (
+        level < len(pertanyaan_cols)
+        and not filtered_df.empty
+        and pd.notna(filtered_df.iloc[0][pertanyaan_cols[level]])
+    ):
+        pertanyaan = filtered_df.iloc[0][pertanyaan_cols[level]]
+        current_jawaban_col = jawaban_cols[level] if level < len(jawaban_cols) else None
+
+        if current_jawaban_col and current_jawaban_col in filtered_df.columns:
+            jawaban_options = filtered_df[current_jawaban_col].dropna().unique().tolist()
         else:
-            st.session_state.chat_history.append({"role": "cs", "text": "Terima kasih atas jawabannya."})
+            jawaban_options = []
 
+        if jawaban_options:
+            jawaban = st.selectbox(f"{level+1}. {pertanyaan}", jawaban_options, key=f"jawaban_{level}")
+            if st.button("Lanjut", key=f"btn_{level}"):
+                st.session_state.jawaban_user.append(jawaban)
+
+                if any(stop in jawaban.lower() for stop in STOP_KEYWORDS):
+                    st.session_state.status_stopped = True
+                    st.session_state.current_level = len(pertanyaan_cols)
+                else:
+                    st.session_state.current_level += 1
+                    st.session_state.trigger_next = True
+        else:
+            jawaban = st.text_input(f"{level+1}. {pertanyaan} (jawaban manual)", key=f"manual_jawaban_{level}")
+            if st.button("Lanjut", key=f"btn_manual_{level}") and jawaban.strip():
+                st.session_state.jawaban_user.append(jawaban.strip())
+
+                if any(stop in jawaban.lower() for stop in STOP_KEYWORDS):
+                    st.session_state.status_stopped = True
+                    st.session_state.current_level = len(pertanyaan_cols)
+                else:
+                    st.session_state.current_level += 1
+                    st.session_state.trigger_next = True
+
+    # Rerun jika perlu
+    if st.session_state.trigger_next:
+        st.session_state.trigger_next = False
         st.rerun()
 
+    # Jika selesai atau tidak ada data cocok, atau pertanyaan kosong
+    if (
+        st.session_state.current_level >= len(pertanyaan_cols)
+        or filtered_df.empty
+        or (level < len(pertanyaan_cols) and not pd.notna(filtered_df.iloc[0][pertanyaan_cols[level]]))
+    ):
+        fitur_user = ' '.join(st.session_state.jawaban_user).strip()
 
-#tombol input
-def simpan_ke_excel(chat_history, filename="dataset/riwayat_chat.xlsx"):
-    # Buat DataFrame dari chat
-    data = []
-    for i in range(0, len(chat_history), 2):  # anggap selalu 1 jawaban pelanggan -> 1 respon CS
-        pelanggan = chat_history[i]["text"] if chat_history[i]["role"] == "pelanggan" else ""
-        cs = chat_history[i+1]["text"] if i+1 < len(chat_history) and chat_history[i+1]["role"] == "cs" else ""
-        data.append({"Jawaban Pelanggan": pelanggan, "Pertanyaan CS": cs})
+        st.markdown("---")
+        if not fitur_user:
+            st.warning("⚠️ Tidak ada data jawaban yang bisa diproses.")
+        elif st.session_state.status_stopped:
+            st.error("❌ Simulasi dihentikan karena pelanggan tidak dapat dihubungi atau nomor tidak valid.")
+            st.write("**Status:** Tidak diproses")
+            st.write("**Jenis Promo:** Tidak tersedia")
+        else:
+            st.write("Jawaban pengguna:", st.session_state.jawaban_user)
+            st.write("Fitur untuk prediksi:", fitur_user)
 
-    df = pd.DataFrame(data)
+            status_pred = model_status.predict([fitur_user])[0]
+            promo_pred = model_promo.predict([fitur_user])[0]
 
-    # Jika file sudah ada → append
-    if os.path.exists(filename):
-        df_lama = pd.read_excel(filename)
-        df_baru = pd.concat([df_lama, df], ignore_index=True)
-    else:
-        df_baru = df
+            st.success("✅ **Hasil Prediksi**")
+            st.write(f"**Status Pelanggan:** {status_pred}")
+            st.write(f"**Jenis Promo:** {promo_pred}")
 
-    df_baru.to_excel(filename, index=False)
-    return filename
-
-if st.button("💾 Simpan ke Excel"):
-    file_excel = simpan_ke_excel(st.session_state.chat_history)
-    st.success(f"Riwayat percakapan berhasil disimpan ke file: `{file_excel}`")
-
-
-# 8. Tombol reset
-if st.button("🔁 Reset Percakapan"):
-    st.session_state.chat_history = []
-    st.session_state.step = 1
-    st.success("Percakapan telah direset.")
-    st.rerun()
-
-# 9. Info
-st.markdown("---")
-st.caption("🤖 Sistem prediksi pertanyaan ini menggunakan beberapa model machine learning terpisah berdasarkan langkah pertanyaan.")
-
-
+        if st.button("🔁 Ulangi Simulasi"):
+            st.session_state.jawaban_user = []
+            st.session_state.current_level = 0
+            st.session_state.trigger_next = False
+            st.session_state.status_stopped = False
+            st.session_state.selected_pertanyaan = []
+            st.rerun()
