@@ -1,0 +1,189 @@
+{
+    "Winback": {
+        "Selamat Pagi/Siang/Sore Perkenalkan Saya (Nama Agen) Dari ICONNET, Apakah Benar Saya Terhubung Dengan (Nama Pelanggan) ?, Baik Bapak/Ibu. Kami Melihat Bahwa Layanan ICONNET Bapak/Ibu Sedang Terputus dan Kami Ingin Tahu Apakah Ada Kendala Yang Bisa Kami Bantu?": {
+            "Sudah Berhenti Berlangganan": {
+                "baik bapak/Ibu Jika boleh kami tahu berhentinya karena apa?": {
+                    "Gangguan Jaringan": {
+                        "baik, untuk perangkat iconnet nya apakah masih berada di lokasi?": {
+                            "Masih Di Lokasi": {
+                                "untuk saat ini bpk/ibu menggunakan provider apa?": {
+                                    "Provider A": {
+                                        "baik bapak/ibu kami konfirmasi ulang bahwa bapak/Ibu berhenti berlanggananya. terimakasih atas waktunya, mohon maaf mengganggu selamat pagi/siang/sore.": {
+                                            "Baik, Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Sudah Tidak Butuh": {
+                        "baik, untuk perangkat iconnet nya apakah masih berada di lokasi?": {
+                            "Sudah Di Ambil": {
+                                "untuk saat ini bpk/ibu menggunakan provider apa?": {
+                                    "Provider A": {
+                                        "baik bapak/ibu kami konfirmasi ulang bahwa bapak/Ibu berhenti berlanggananya. terimakasih atas waktunya, mohon maaf mengganggu selamat pagi/siang/sore.": {
+                                            "Baik, Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Gangguan Jaringan": {
+                "sebelumnya mohon maaf atas ketidaknyamanan bapak/ibu. apakah bapak/ibu sudah pernah melaporkan gangguan sebelumnya? \n\n": {
+                    "Belum": {
+                        "Baik, akan kami lakukan pengecekan ulang, atas kendala tersebut ibu/Bpk. Jika kendala sudah teratasi apakah Bapak/Ibu bersedia lanjut berlangganan?": {
+                            "Saya Pertimbangkan": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa bapak/ibu akan mempertimbangkan terlebih dahulu ya bapak/Ibu?": {
+                                    "Iya": {
+                                        "terimakasih atas waktunya. mohon maaf mengganggu, selamat pagi/siang/sore.": {
+                                            "Baik, Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            },
+                            "Lanjut Berlangganan": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa bapak/ibu akan lanjut ya bapak/Ibu?": {
+                                    "Iya": {
+                                        "terimakasih atas waktunya. mohon maaf mengganggu, selamat pagi/siang/sore.": {
+                                            "Baik, Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Sudah": {
+                        "Baik, akan kami lakukan pengecekan ulang, atas kendala tersebut ibu/Bpk. Jika kendala sudah teratasi apakah Bapak/Ibu bersedia lanjut berlangganan?": {
+                            "Saya Pertimbangkan": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa bapak/ibu akan mempertimbangkan terlebih dahulu ya bapak/Ibu?": {
+                                    "Iya": {
+                                        "terimakasih atas waktunya. mohon maaf mengganggu, selamat pagi/siang/sore.": {
+                                            "Baik, Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            },
+                            "Lanjut Berlangganan": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa bapak/ibu akan lanjut ya bapak/Ibu?": {
+                                    "Iya": {
+                                        "terimakasih atas waktunya. mohon maaf mengganggu, selamat pagi/siang/sore.": {
+                                            "Baik, Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Tidak Respon": {
+                "baik bapak/Ibu karena tidak ada respon kami tutup teleponnya. mohon maaf mengganggu terima kasih selamat pagi/siang/sore.": {
+                    "Baik, Terima Kasih": {}
+                }
+            },
+            "Tidak Ada Gangguan": {
+                "baik bapak/Ibu mohon maaf sebelumnya nama pelanggan bapak/ibu tercantum pada sistem kami karena belum melakukan pembayaran. saat ini kami memiliki promo bayar 1 bulan gratis 1 bulan pemakaian. bapak/ibu. apakah bapak/Ibu tertarik?": {
+                    "Tertarik": {
+                        "baik bapak/ibu akan kami proses, kalau boleh kahu kapan akan dibayar?": {
+                            "Minggu Depan": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa ibu/bpk bersedia mengambil program. terimakasih mohon maaf mengganggu selamat pagi/siang/sore.": {
+                                    "Baik, Terima Kasih": {}
+                                }
+                            },
+                            "Besok": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa ibu/bpk bersedia mengambil program. terimakasih mohon maaf mengganggu selamat pagi/siang/sore.": {
+                                    "Baik, Terima Kasih": {}
+                                }
+                            },
+                            "Akhir Bulan": {
+                                "baik bapak/ibu kami konfirmasi ulang bahwa ibu/bpk bersedia mengambil program. terimakasih mohon maaf mengganggu selamat pagi/siang/sore.": {
+                                    "Baik, Terima Kasih": {}
+                                }
+                            }
+                        }
+                    },
+                    "Tidak Berminat": {
+                        "baik bapak/ibu alasannya karena apa?": {
+                            "Kurang Berminat": {
+                                "baik terima kasih untuk konfirmasinya bapak/ibu mohon maaf mengganggu selamat pagi/siang/sore.": {
+                                    "Baik, Terima Kasih": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "Retention": {
+        "Selamat Pagi/Siang/Sore Perkenalkan Saya (Nama Agen) Dari ICONNET, Apakah Benar Saya Terhubung Dengan (Nama Pelanggan) ?, Baik Bapak/Ibu. Kami Melihat Bahwa Layanan ICONNET Bapak/Ibu Sedang Terputus dan Kami Ingin Tahu Apakah Ada Kendala Yang Bisa Kami Bantu?": {
+            "Tidak Ada ": {
+                "Saat ini kami sedang memiliki promo menarik untuk bapak/ibu. Sebagai bentuk apresiasi, kami menawarkan promo\nDiskon 20% untuk berlangganan bulanan\nDiskon 25% untuk 6bulan berlangganan\nDiskon 30% untuk 12bulan berlangganan \nApakah bapak/ibu bersedia untuk mengaktifkan layanan ICONNETnya kembali?": {
+                    "Tidak": {
+                        "Baik bapak/ibu, jika boleh tau karena apa ya?": {
+                            "Tidak Berminat": {
+                                "apakah perangkatnya masih berada dilokasi?": {
+                                    "Masih Di Lokasi": {
+                                        "baik bapak/ibu terimakasih atas waktu dan konfirmasinya,  mohon maaf mengganggu \nselamat pagi/siang/sore.": {
+                                            "Baik,Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "Tentu": {},
+                    "Sudah Pindah Rumah": {
+                        "baik bapak/ibu, untuk dirumah saat ini apakah sudah terpasang wifi iconnet?": {
+                            "Belum": {
+                                " apakah bapak/ibu berminat untuk pasang kembali ?": {
+                                    "Tentu": {
+                                        "baik bapak/ibu terimakasih atas waktu dan konfirmasinya,  mohon maaf mengganggu \nselamat pagi/siang/sore.": {
+                                            "Baik,Terima Kasih": {}
+                                        }
+                                    }
+                                }
+                            },
+                            "Sudah": {
+                                "baik bapak/ibu terimakasih atas waktu dan konfirmasinya,  mohon maaf mengganggu \nselamat pagi/siang/sore.": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            }
+                        }
+                    },
+                    "Dipertimbangkan": {}
+                }
+            },
+            "Berhenti Berlangganan": {
+                "baik kami konfirmasi ulang bahwa bapak/ibu berhenti berlanggan ya. Terimakasih atas waktunya, mohon maaf mengganggu selamat pagi/siang/sore": {
+                    "Baik, Terima Kasih": {}
+                }
+            },
+            "Bukan Saya": {}
+        }
+    },
+    "Telecollection": {
+        "Selamat Pagi/Siang/Sore Perkenalkan Saya (Nama Agen) Dari ICONNET, Apakah Benar Saya Terhubung Dengan (Nama Pelanggan) ?, Baik Bapak/Ibu. Kami Melihat Bahwa Layanan ICONNET Bapak/Ibu Sedang Terputus dan Kami Ingin Tahu Apakah Ada Kendala Yang Bisa Kami Bantu?": {
+            "belum": {
+                "Baik pak/bu, izin mengingatkan mengenai pembayaran ICONNET bulanannya yaa saat ini tagihan iconnet bapak/ibu sudah muncul, nomor pembayaran saat ini sudah kami kirimkan melalui email dan WhatsApp. Silahkan untuk melakukan pengecekan melalui email ataupun Whatsaap bapak/ibu. Mohon untuk segera melakukan pembayaran agar ICONNET dirumah bapak/ibu tetap aktif.": {
+                    "iya": {
+                        "baik bapak/ibu, sekiranya kapan akan melakukan pembayaran ya bapak/ibu ?": {
+                            "minggu depan": {},
+                            "tanggal 14 september": {},
+                            "hari ini": {},
+                            "segera": {},
+                            "tanggal 15 september": {},
+                            "besok": {},
+                            "akan saya bayar segera": {},
+                            "tanggal 20 september": {},
+                            "iya hari ini": {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
