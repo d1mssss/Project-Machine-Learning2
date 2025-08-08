@@ -1,0 +1,4 @@
+[2025-08-08 10:22:08] Dataset utama: 47 baris
+[2025-08-08 10:22:08] Interaksi baru: 5 baris
+[2025-08-08 10:22:08] Backup disimpan: dataset/dataset_backup_20250808_102208.xlsx
+[2025-08-08 10:22:08] ❌ Error menggabungkan dataset: [Errno 13] Permission denied: 'dataset/dataset_filled_status_promo.xlsx'

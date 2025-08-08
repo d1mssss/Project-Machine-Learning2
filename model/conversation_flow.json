@@ -171,15 +171,51 @@
                 "Baik pak/bu, izin mengingatkan mengenai pembayaran ICONNET bulanannya yaa saat ini tagihan iconnet bapak/ibu sudah muncul, nomor pembayaran saat ini sudah kami kirimkan melalui email dan WhatsApp. Silahkan untuk melakukan pengecekan melalui email ataupun Whatsaap bapak/ibu. Mohon untuk segera melakukan pembayaran agar ICONNET dirumah bapak/ibu tetap aktif.": {
                     "iya": {
                         "baik bapak/ibu, sekiranya kapan akan melakukan pembayaran ya bapak/ibu ?": {
-                            "minggu depan": {},
-                            "tanggal 14 september": {},
-                            "hari ini": {},
-                            "segera": {},
-                            "tanggal 15 september": {},
-                            "besok": {},
-                            "akan saya bayar segera": {},
-                            "tanggal 20 september": {},
-                            "iya hari ini": {}
+                            "minggu depan": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "tanggal 14 september": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "hari ini": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "segera": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "tanggal 15 september": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "besok": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "akan saya bayar segera": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "tanggal 20 september": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            },
+                            "iya hari ini": {
+                                "Baik bapak/ibu,Terima kasih atas waktu dan konfirmasinya mohon maaf mengganggu selamat pagi/siang/sore": {
+                                    "Baik,Terima Kasih": {}
+                                }
+                            }
                         }
                     }
                 }

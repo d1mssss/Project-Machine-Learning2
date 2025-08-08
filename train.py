@@ -1,17 +1,44 @@
-# train.py
-
 import pandas as pd
 import joblib
 import os
 import json
+import re
+from datetime import datetime, timedelta
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
 # --- Konfigurasi ---
 os.makedirs("model", exist_ok=True)
 DATASET_PATH = "dataset/dataset_filled_status_promo.xlsx"
+CUSTOMER_ID_PATH = "dataset/datasets_Customer_ID.xlsx"
 CONVERSATION_FLOW_PATH = "model/conversation_flow.json"
 VECTORIZER_PATH = "model/vectorizer.pkl"
+CUSTOMER_ID_LIST_PATH = "model/customer_ids.pkl"
+
+# --- Fungsi untuk Memuat dan Menyimpan Customer ID ---
+def load_and_save_customer_ids():
+    """Memuat daftar Customer ID dan menyimpannya untuk validasi di app."""
+    print("\nMemuat daftar Customer ID...")
+    try:
+        df_customers = pd.read_excel(CUSTOMER_ID_PATH)
+        customer_ids = df_customers['Customer_ID'].astype(str).tolist()
+        
+        # Simpan sebagai set untuk validasi cepat
+        customer_id_set = set(customer_ids)
+        joblib.dump(customer_id_set, CUSTOMER_ID_LIST_PATH)
+        
+        print(f"✅ Berhasil memuat {len(customer_ids)} Customer ID dari '{CUSTOMER_ID_PATH}'.")
+        print(f"✅ Daftar Customer ID disimpan di '{CUSTOMER_ID_LIST_PATH}'.")
+        
+        # Tampilkan sample
+        sample_ids = customer_ids[:5]
+        print(f"Sample Customer ID: {sample_ids}")
+        
+        return customer_id_set
+        
+    except Exception as e:
+        print(f"❌ Error memuat Customer ID: {e}")
+        return set()
 
 # --- Fungsi untuk Membangun Alur Percakapan ---
 def build_conversation_flow(df):
@@ -110,20 +137,24 @@ if __name__ == "__main__":
     df['gabungan_interaksi'] = df[pertanyaan_cols + jawaban_cols].astype(str).apply(lambda row: ' '.join(row), axis=1)
     print("✅ Berhasil menggabungkan teks interaksi untuk training.")
 
-    # 1. Bangun dan simpan alur percakapan
+    # 1. Muat dan simpan daftar Customer ID
+    load_and_save_customer_ids()
+
+    # 2. Bangun dan simpan alur percakapan
     build_conversation_flow(df)
 
-    # 2. Latih dan simpan Vectorizer
+    # 3. Latih dan simpan Vectorizer
     print("\nMembuat dan melatih vectorizer...")
     vectorizer = TfidfVectorizer()
     vectorizer.fit(df['gabungan_interaksi'])
     joblib.dump(vectorizer, VECTORIZER_PATH)
     print(f"✅ Vectorizer berhasil disimpan sebagai '{VECTORIZER_PATH}'.")
 
-    # 3. Latih dan simpan semua model prediksi
-    train_and_save_model(df, vectorizer, 'status', 'model_status.pkl')
+    # 4. Latih dan simpan semua model prediksi
+    train_and_save_model(df, vectorizer, 'Status', 'model_status.pkl')  # Gunakan 'Status' bukan 'status'
     train_and_save_model(df, vectorizer, 'Jenis_Promo', 'model_promo.pkl')
     train_and_save_model(df, vectorizer, 'Mode', 'model_mode.pkl')
 
     print("\n--- Proses Selesai ---")
-    print("Semua model (status, Jenis_Promo, mode), vectorizer, dan alur percakapan telah berhasil dibuat.")
+    print("Semua model (Status, Jenis_Promo, Mode), vectorizer, Customer ID, dan alur percakapan telah berhasil dibuat.")
+    print("ℹ️  Estimasi Pembayaran menggunakan ekstraksi real-time dari jawaban pelanggan, bukan model prediksi.")
