@@ -1,137 +1,148 @@
+# app.py
+
 import streamlit as st
 import joblib
-import pandas as pd
+import os
+import json
+import numpy as np
 
-# Load model
-model_status = joblib.load('model/model_status.pkl')
-model_promo = joblib.load('model/model_promo.pkl')
+# Konfigurasi halaman
+st.set_page_config(page_title="Simulasi CS ICONNET", page_icon="📞", layout="wide")
 
-# Load dataset
-df = pd.read_excel("dataset/dataset_gabungan_600_baris.xlsx")
+# === Placeholder jika model/file gagal dimuat ===
+class FakePredictor:
+    def predict(self, data):
+        return ["(model tidak ditemukan)"]
 
-# Ambil kolom pertanyaan dan jawaban
-pertanyaan_cols = [col for col in df.columns if col.startswith("Pertanyaan_CS")]
-jawaban_cols = [col for col in df.columns if col.startswith("Jawaban_Pelanggan")]
+class FakeVectorizer:
+    def transform(self, data):
+        return np.zeros((len(data), 1))
 
-# Kata kunci yang menghentikan simulasi
-STOP_KEYWORDS = ["rejected", "nomor tidak aktif", "nomor salah", "tidak bisa dihubungi"]
+# === Fungsi untuk memuat semua aset (model & flow) ===
+@st.cache_resource
+def load_assets():
+    """Memuat vectorizer, model prediksi, dan alur percakapan."""
+    assets = {}
+    # Load Vectorizer
+    try:
+        assets['vectorizer'] = joblib.load("model/vectorizer.pkl")
+    except Exception:
+        assets['vectorizer'] = FakeVectorizer()
+        st.warning("model/vectorizer.pkl tidak ditemukan.")
+    
+    # Load Models
+    model_files = ['model_status.pkl', 'model_promo.pkl', 'model_mode.pkl']
+    for mf in model_files:
+        key = mf.split('.')[0] # e.g., 'model_status'
+        try:
+            assets[key] = joblib.load(f"model/{mf}")
+        except Exception:
+            assets[key] = FakePredictor()
+            st.warning(f"model/{mf} tidak ditemukan.")
 
-# Konfigurasi tampilan
-st.set_page_config(page_title="Simulasi CS ICONNET", page_icon="🤖")
-st.title("🤖 Simulasi Dinamis ICONNET")
+    # Load Conversation Flow
+    try:
+        with open("model/conversation_flow.json", 'r', encoding='utf-8') as f:
+            assets['flow'] = json.load(f)
+    except Exception:
+        assets['flow'] = {}
+        st.error("❌ Gagal memuat alur percakapan 'conversation_flow.json'. Jalankan train.py terlebih dahulu.")
+        st.stop()
+        
+    return assets
+
+# === Inisialisasi Aplikasi ===
+assets = load_assets()
+st.title("📞 Simulasi Percakapan CS ICONNET")
+st.markdown("Simulasi ini sepenuhnya dijalankan berdasarkan model alur percakapan dan model prediksi.")
 
 # Inisialisasi session state
-if "jawaban_user" not in st.session_state:
-    st.session_state.jawaban_user = []
-if "current_level" not in st.session_state:
-    st.session_state.current_level = 0
-if "trigger_next" not in st.session_state:
-    st.session_state.trigger_next = False
-if "status_stopped" not in st.session_state:
-    st.session_state.status_stopped = False
-if "selected_pertanyaan" not in st.session_state:
-    st.session_state.selected_pertanyaan = []
+if 'step' not in st.session_state:
+    st.session_state.step = 0
+    st.session_state.history = [] # Menyimpan {'q': ..., 'a': ...}
+    st.session_state.current_node = {}
+    st.session_state.selected_mode = None
 
-# Menentukan 4 pertanyaan teratas berdasarkan kemunculan
-all_pertanyaan = pd.concat([df[col].dropna() for col in pertanyaan_cols], ignore_index=True)
-most_common_questions = all_pertanyaan.value_counts().nlargest(4).index.tolist()
+# === Fungsi untuk mereset simulasi ===
+def reset_simulation():
+    """Mengembalikan session state ke awal."""
+    st.session_state.step = 0
+    st.session_state.history = []
+    st.session_state.current_node = assets['flow'].get(st.session_state.selected_mode, {})
+    st.rerun()
 
-# Pilih 1 dari 4 pertanyaan untuk memulai simulasi
-if not st.session_state.selected_pertanyaan:
-    st.markdown("### Pilih Pertanyaan Awal")
-    for i, q in enumerate(most_common_questions):
-        if st.button(q, key=f"start_{i}"):
-            st.session_state.selected_pertanyaan = [q]
-            st.session_state.jawaban_user = []
-            st.session_state.current_level = 0
-            st.session_state.trigger_next = False
-            st.session_state.status_stopped = False
+# === Tampilan Utama ===
+# Pemilihan Mode (Hanya jika belum dimulai)
+if st.session_state.step == 0:
+    st.session_state.selected_mode = st.selectbox(
+        "1️⃣ Pilih Mode Simulasi", 
+        [""] + list(assets['flow'].keys())
+    )
+    if st.session_state.selected_mode:
+        if st.button("Mulai Simulasi"):
+            st.session_state.step = 1
+            st.session_state.current_node = assets['flow'].get(st.session_state.selected_mode, {})
             st.rerun()
 else:
-    # Filter baris berdasarkan pertanyaan yang dipilih
-    filtered_df = df.copy()
-    filtered_df = filtered_df[
-        filtered_df[pertanyaan_cols[0]] == st.session_state.selected_pertanyaan[0]
-    ]
+    st.info(f"🎯 Mode: **{st.session_state.selected_mode}** | Langkah: **{st.session_state.step}**")
+    
+    # Tampilkan riwayat percakapan
+    if st.session_state.history:
+        with st.expander("📖 Riwayat Percakapan"):
+            for i, item in enumerate(st.session_state.history):
+                st.markdown(f"**Q{i+1}:** `{item['q']}`")
+                st.markdown(f"**A{i+1}:** `{item['a']}`")
+                st.divider()
 
-    # Tambahkan filter berdasarkan jawaban sebelumnya
-    for i, jawaban in enumerate(st.session_state.jawaban_user):
-        if i < len(jawaban_cols):
-            filtered_df = filtered_df[filtered_df[jawaban_cols[i]] == jawaban]
+    # Logika Alur Percakapan
+    current_node = st.session_state.current_node
+    
+    # Cek apakah masih ada pertanyaan di node saat ini
+    if isinstance(current_node, dict) and current_node:
+        # Ambil pertanyaan pertama dari node saat ini
+        pertanyaan_saat_ini = list(current_node.keys())[0]
+        
+        st.subheader(f"📞 Pertanyaan {st.session_state.step}:")
+        st.info(pertanyaan_saat_ini)
+        
+        # Opsi jawaban adalah keys dari level selanjutnya
+        opsi_jawaban = list(current_node[pertanyaan_saat_ini].keys())
+        
+        jawaban_terpilih = st.radio(
+            "Pilih Jawaban Pelanggan:",
+            opsi_jawaban,
+            key=f"answer_{st.session_state.step}"
+        )
 
-    # Jalankan pertanyaan berikutnya
-    level = st.session_state.current_level
-    if (
-        level < len(pertanyaan_cols)
-        and not filtered_df.empty
-        and pd.notna(filtered_df.iloc[0][pertanyaan_cols[level]])
-    ):
-        pertanyaan = filtered_df.iloc[0][pertanyaan_cols[level]]
-        current_jawaban_col = jawaban_cols[level] if level < len(jawaban_cols) else None
-
-        if current_jawaban_col and current_jawaban_col in filtered_df.columns:
-            jawaban_options = filtered_df[current_jawaban_col].dropna().unique().tolist()
-        else:
-            jawaban_options = []
-
-        if jawaban_options:
-            jawaban = st.selectbox(f"{level+1}. {pertanyaan}", jawaban_options, key=f"jawaban_{level}")
-            if st.button("Lanjut", key=f"btn_{level}"):
-                st.session_state.jawaban_user.append(jawaban)
-
-                if any(stop in jawaban.lower() for stop in STOP_KEYWORDS):
-                    st.session_state.status_stopped = True
-                    st.session_state.current_level = len(pertanyaan_cols)
-                else:
-                    st.session_state.current_level += 1
-                    st.session_state.trigger_next = True
-        else:
-            jawaban = st.text_input(f"{level+1}. {pertanyaan} (jawaban manual)", key=f"manual_jawaban_{level}")
-            if st.button("Lanjut", key=f"btn_manual_{level}") and jawaban.strip():
-                st.session_state.jawaban_user.append(jawaban.strip())
-
-                if any(stop in jawaban.lower() for stop in STOP_KEYWORDS):
-                    st.session_state.status_stopped = True
-                    st.session_state.current_level = len(pertanyaan_cols)
-                else:
-                    st.session_state.current_level += 1
-                    st.session_state.trigger_next = True
-
-    # Rerun jika perlu
-    if st.session_state.trigger_next:
-        st.session_state.trigger_next = False
-        st.rerun()
-
-    # Jika selesai atau tidak ada data cocok, atau pertanyaan kosong
-    if (
-        st.session_state.current_level >= len(pertanyaan_cols)
-        or filtered_df.empty
-        or (level < len(pertanyaan_cols) and not pd.notna(filtered_df.iloc[0][pertanyaan_cols[level]]))
-    ):
-        fitur_user = ' '.join(st.session_state.jawaban_user).strip()
-
-        st.markdown("---")
-        if not fitur_user:
-            st.warning("⚠️ Tidak ada data jawaban yang bisa diproses.")
-        elif st.session_state.status_stopped:
-            st.error("❌ Simulasi dihentikan karena pelanggan tidak dapat dihubungi atau nomor tidak valid.")
-            st.write("**Status:** Tidak diproses")
-            st.write("**Jenis Promo:** Tidak tersedia")
-        else:
-            st.write("Jawaban pengguna:", st.session_state.jawaban_user)
-            st.write("Fitur untuk prediksi:", fitur_user)
-
-            status_pred = model_status.predict([fitur_user])[0]
-            promo_pred = model_promo.predict([fitur_user])[0]
-
-            st.success("✅ **Hasil Prediksi**")
-            st.write(f"**Status Pelanggan:** {status_pred}")
-            st.write(f"**Jenis Promo:** {promo_pred}")
-
-        if st.button("🔁 Ulangi Simulasi"):
-            st.session_state.jawaban_user = []
-            st.session_state.current_level = 0
-            st.session_state.trigger_next = False
-            st.session_state.status_stopped = False
-            st.session_state.selected_pertanyaan = []
+        if st.button("Jawab & Lanjutkan", key=f"submit_{st.session_state.step}"):
+            # Simpan ke riwayat
+            st.session_state.history.append({'q': pertanyaan_saat_ini, 'a': jawaban_terpilih})
+            # Update node ke level selanjutnya
+            st.session_state.current_node = current_node[pertanyaan_saat_ini][jawaban_terpilih]
+            st.session_state.step += 1
             st.rerun()
+    else:
+        # Akhir dari percakapan
+        st.success("✅ Simulasi Selesai!")
+        st.subheader("📊 Hasil Prediksi Berdasarkan Keseluruhan Percakapan:")
+        
+        # Gabungkan seluruh histori untuk prediksi
+        full_conversation_text = " ".join([f"{item['q']} {item['a']}" for item in st.session_state.history])
+        
+        # Vectorize teks
+        vectorized_text = assets['vectorizer'].transform([full_conversation_text])
+        
+        # Lakukan prediksi
+        pred_status = assets['model_status'].predict(vectorized_text)[0]
+        pred_promo = assets['model_promo'].predict(vectorized_text)[0]
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Prediksi Status Akhir", pred_status)
+        with col2:
+            st.metric("Prediksi Jenis Promo", pred_promo)
+            
+    # Tombol Reset selalu tersedia setelah simulasi dimulai
+    st.markdown("---")
+    if st.button("🔁 Reset Simulasi"):
+        reset_simulation()
